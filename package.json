@@ -1,0 +1,27 @@
+{
+  "name": "sae_but3",
+  "version": "1.0.0",
+  "description": "Sae du but 3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeVanAmaury/SAE_BUT3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/LeVanAmaury/SAE_BUT3/issues"
+  },
+  "homepage": "https://github.com/LeVanAmaury/SAE_BUT3#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "husky": "^9.1.7"
+  }
+}

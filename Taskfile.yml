@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  dev:
+    desc: "Lance PostgreSQL et les serveurs de dev"
+    cmds:
+      - docker compose up -d postgres
+      - echo "Environnement prêt."
+
+  sandbox:build:
+    desc: "Construit l'image Docker de la sandbox"
+    cmds:
+      - docker build -t codearena-sandbox:latest ./sandbox
+
+  scan:
+    desc: "Scanne l'image sandbox avec Trivy"
+    cmds:
+      - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL codearena-sandbox:latest
