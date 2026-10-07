@@ -1,4 +1,4 @@
-name: CI & Sécurité
+name: CI & DevSecOps Pipeline
 
 on:
   push:
@@ -7,19 +7,35 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  audit-sandbox:
+  quality-and-security:
     runs-on: ubuntu-latest
     steps:
       - name: Récupération du code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configuration de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installation des dépendances
+        run: |
+          npm install
+          cd backend && npm install
+          cd ../frontend && npm install
+
+      - name: Contrôle anti-triche sur les tests
+        run: bash scripts/check-no-cheat.sh
 
       - name: Construction de l'image Sandbox
-        run: docker build -t codearena-sandbox:test ./sandbox
+        run: docker build -t codearena-sandbox:latest ./sandbox
 
-      - name: Scan de vulnérabilités avec Trivy
+      - name: Scan de vulnérabilités Trivy (Sandbox)
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'codearena-sandbox:test'
+          image-ref: 'codearena-sandbox:latest'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true

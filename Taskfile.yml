@@ -2,17 +2,71 @@ version: '3'
 
 tasks:
   dev:
-    desc: "Lance PostgreSQL et les serveurs de dev"
+    desc: "Démarre PostgreSQL, le backend et le frontend en parallèle"
+    cmds:
+      - task: db:up
+      - echo "Démarrage des serveurs applicatifs..."
+      - npx concurrently -k -n "BACK,FRONT" -c "blue,green" "npm --prefix backend run dev" "npm --prefix frontend run dev"
+
+  db:up:
+    desc: "Démarre PostgreSQL via Docker"
     cmds:
       - docker compose up -d postgres
-      - echo "Environnement prêt."
+
+  db:down:
+    desc: "Arrête PostgreSQL"
+    cmds:
+      - docker compose down
+
+  db:reset:
+    desc: "Réinitialise complètement la base de données"
+    cmds:
+      - docker compose down -v postgres
+      - docker compose up -d postgres
+      - echo "Base réinitialisée."
+
+  code:
+    desc: "Vérifie le formatage et les règles de code"
+    cmds:
+      - echo "Vérification syntaxique..."
+      - node --check backend/index.js
+
+  test:unit:
+    desc: "Lance les tests unitaires backend"
+    cmds:
+      - echo "Exécution des tests unitaires..."
+      # Commande à brancher dès l'écriture des tests (ex: node --test backend/tests/*.test.js)
+
+  test:e2e:
+    desc: "Exécute les tests fonctionnels E2E (Playwright)"
+    cmds:
+      - npm --prefix frontend run test:e2e
+
+  test:
+    desc: "Exécute toute la suite de validation avec barrière anti-triche"
+    cmds:
+      - task: check:no-cheat
+      - task: test:unit
+      - task: test:e2e
+      - echo "Tous les tests sont passés avec succès."
+
+  check:no-cheat:
+    desc: "Vérifie l'absence de tests désactivés (.skip, .only) dans le diff"
+    cmds:
+      - BASE=HEAD bash scripts/check-no-cheat.sh
 
   sandbox:build:
-    desc: "Construit l'image Docker de la sandbox"
+    desc: "Construit l'image Docker de la Sandbox d'exécution"
     cmds:
       - docker build -t codearena-sandbox:latest ./sandbox
 
-  scan:
-    desc: "Scanne l'image sandbox avec Trivy"
+  scan:vulnerabilities:
+    desc: "Scanne l'image de la sandbox avec Trivy"
     cmds:
       - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL codearena-sandbox:latest
+
+  scan:
+    desc: "Audit de sécurité global (conteneurs et dépendances)"
+    cmds:
+      - task: sandbox:build
+      - task: scan:vulnerabilities

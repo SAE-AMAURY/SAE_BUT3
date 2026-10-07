@@ -13,3 +13,8 @@ build/
 
 # Données locales Docker
 pgdata/
+
+# Fichiers d'environnement stricts
+.env
+.env.local
+tmp/
