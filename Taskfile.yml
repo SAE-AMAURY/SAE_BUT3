@@ -29,7 +29,7 @@ tasks:
     desc: "Vérifie le formatage et les règles de code"
     cmds:
       - echo "Vérification syntaxique..."
-      - node --check backend/index.js
+      - npx prettier --check "backend/**/*.js" "frontend/src/**/*.{js,vue}"
 
   test:unit:
     desc: "Lance les tests unitaires backend"
@@ -70,3 +70,8 @@ tasks:
     cmds:
       - task: sandbox:build
       - task: scan:vulnerabilities
+
+  scan:secrets:
+    desc: "Scanne le code pour détecter des clés ou mots de passe exposés"
+    cmds:
+      - docker run --rm -v "${PWD}:/path" zricethezav/gitleaks:latest detect --source="/path" --verbose
