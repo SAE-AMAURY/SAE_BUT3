@@ -42,6 +42,13 @@ jobs:
           severity: 'CRITICAL'
 
       - name: Scan des secrets (Gitleaks)
+<<<<<<< Updated upstream
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+=======
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+>>>>>>> Stashed changes
