@@ -1,9 +1,20 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { defineAsyncComponent } from 'vue';
+const CodeEditor = defineAsyncComponent(() => import('../components/CodeEditor.vue'));
 
 const canvasRef = ref(null);
 const isRunning = ref(false);
 const tickRate = ref(60);
+const botCode = ref(`# Script du bot Alpha-Guerrier
+def on_tick(game):
+    enemy = game.nearest_enemy()
+
+    if enemy and game.distance_to(enemy) < 120:
+        game.attack(enemy)
+    else:
+        game.move_towards(enemy)
+`);
 
 const bots = ref([
   {
@@ -198,6 +209,36 @@ function resetMatch() {
             ></span>
             {{ isRunning ? "En cours d'exécution (60 FPS)" : 'En attente' }}
           </span>
+        </div>
+
+        <!-- Monaco Editor -->
+        <div
+          class="w-full mt-4 rounded-lg border border-slate-800 bg-[#2c363f] overflow-hidden shadow-inner"
+        >
+          <div
+            class="flex items-center justify-between gap-3 px-3 py-2 border-b border-slate-700/80 bg-slate-950/60"
+          >
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <h2 class="text-sm font-bold text-slate-200">Script de combat</h2>
+            </div>
+            <span
+              class="text-[11px] uppercase tracking-wider text-cyan-300 bg-cyan-400/10 border border-cyan-400/20 rounded px-2 py-1"
+            >
+              Python
+            </span>
+          </div>
+
+          <div class="h-80">
+            <CodeEditor v-model="botCode" language="python" />
+          </div>
+
+          <div
+            class="flex items-center justify-between px-3 py-2 border-t border-slate-700/80 bg-slate-950/60 text-xs text-slate-400"
+          >
+            <span>Monaco Editor</span>
+            <span class="text-emerald-400">Prêt à compiler</span>
+          </div>
         </div>
       </div>
 

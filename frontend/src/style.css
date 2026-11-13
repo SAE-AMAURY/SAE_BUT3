@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --color-arena-bg: #2C363F;
+  --color-arena-primary: #2CCED2;
+  --color-arena-soft: #76CDCD;
+  --color-arena-pink: #F69495;
+  --color-arena-coral: #F38071;
+  --color-arena-amber: #F5B95B;
+}
+
 :root {
   color-scheme: dark;
 }
