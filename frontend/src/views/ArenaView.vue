@@ -1,13 +1,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { defineAsyncComponent } from 'vue';
+import { useScripts } from '../composables/useScripts.js';
 const CodeEditor = defineAsyncComponent(
   () => import('../components/CodeEditor.vue')
 );
 
+const { saveScript } = useScripts();
 const canvasRef = ref(null);
 const isRunning = ref(false);
 const tickRate = ref(60);
+const saveState = ref('idle');
+const saveMessage = ref('');
 const botCode = ref(`# Script du bot Alpha-Guerrier
 def on_tick(game):
     enemy = game.nearest_enemy()
@@ -140,6 +144,24 @@ function resetMatch() {
     text: 'Arène réinitialisée aux positions initiales.',
   });
 }
+
+async function handleSaveCode() {
+  saveState.value = 'saving';
+  saveMessage.value = '';
+
+  try {
+    await saveScript(botCode.value);
+    saveState.value = 'saved';
+    saveMessage.value = 'Code enregistré.';
+    logs.value.unshift({
+      time: new Date().toLocaleTimeString(),
+      text: 'Script du bot enregistré.',
+    });
+  } catch (error) {
+    saveState.value = 'error';
+    saveMessage.value = error.message || "Impossible d'enregistrer le code.";
+  }
+}
 </script>
 
 <template>
@@ -233,6 +255,15 @@ function resetMatch() {
             >
               Python
             </span>
+            <button
+              id="btn-save-code"
+              type="button"
+              :disabled="saveState === 'saving'"
+              @click="handleSaveCode"
+              class="px-3 py-1.5 rounded-md text-xs font-semibold text-arena-bg bg-arena-primary hover:bg-arena-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {{ saveState === 'saving' ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
           </div>
 
           <div class="h-80">
@@ -243,7 +274,17 @@ function resetMatch() {
             class="flex items-center justify-between px-3 py-2 border-t border-arena-soft/20 bg-arena-deep/60 text-xs text-arena-soft/80"
           >
             <span>Monaco Editor</span>
-            <span class="text-arena-primary">Prêt à compiler</span>
+            <span
+              :class="
+                saveState === 'error'
+                  ? 'text-arena-pink'
+                  : saveState === 'saved'
+                    ? 'text-arena-primary'
+                    : 'text-arena-soft/80'
+              "
+            >
+              {{ saveMessage || 'Prêt à compiler' }}
+            </span>
           </div>
         </div>
       </div>
