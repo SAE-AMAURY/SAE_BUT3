@@ -16,6 +16,7 @@ erDiagram
         string email
         string password
         int elo_rank
+        int selected_class_id FK
     }
     MATCH {
         int match_id PK
@@ -67,7 +68,8 @@ Le schéma relationnel traduit les entités et relations ci-dessus dans PostgreS
    **username** VARCHAR(50) NOT NULL UNIQUE,
    **email** VARCHAR(255) NOT NULL UNIQUE,
    **password** VARCHAR(255) NOT NULL,
-   **elo_rank** INT NOT NULL DEFAULT 1000
+   **elo_rank** INT NOT NULL DEFAULT 1000,
+   #selected_class_id INT NULL REFERENCES CLASS(class_id) ON DELETE SET NULL
 )
 
 2. **CLASS** (

@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS "user" (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    elo_rank INT NOT NULL DEFAULT 1000
+    elo_rank INT NOT NULL DEFAULT 1000,
+    selected_class_id INT
 );
 
 -- 2. Table: CLASS (sans clé étrangère requise initialement pour éviter la dépendance circulaire)
@@ -56,6 +57,15 @@ BEGIN
             AND base_damage > 0
             AND base_action_points > 0
         );
+    END IF;
+
+    ALTER TABLE "user" ADD COLUMN IF NOT EXISTS selected_class_id INT;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'fk_user_selected_class'
+    ) THEN
+        ALTER TABLE "user"
+        ADD CONSTRAINT fk_user_selected_class
+        FOREIGN KEY (selected_class_id) REFERENCES class(class_id) ON DELETE SET NULL;
     END IF;
 END $$;
 

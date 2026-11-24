@@ -164,7 +164,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const userRes = await pool.query(
-      'SELECT player_id, username, email, elo_rank FROM "user" WHERE player_id = $1',
+      'SELECT player_id, username, email, elo_rank, selected_class_id FROM "user" WHERE player_id = $1',
       [req.user.player_id]
     );
 
