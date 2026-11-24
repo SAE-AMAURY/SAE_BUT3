@@ -147,6 +147,21 @@
           "message": { "type": "string", "example": "Script sauvegardé avec succès." },
           "script": { "$ref": "#/components/schemas/Script" }
         }
+      },
+      "SelectClassRequest": {
+        "type": "object",
+        "required": ["class_id"],
+        "properties": {
+          "class_id": { "type": "integer", "minimum": 1, "example": 1 }
+        }
+      },
+      "SelectedClassResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "Classe sélectionnée pour le prochain match." },
+          "selected_class_id": { "type": "integer", "nullable": true, "example": 1 },
+          "selected_class": { "$ref": "#/components/schemas/GameClass" }
+        }
       }
     }
   },
@@ -254,6 +269,75 @@
         }
       }
     },
+    "/classes/selected": {
+      "get": {
+        "summary": "Consulter la classe sélectionnée par le pilote connecté pour son prochain match",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Classe sélectionnée (ou null)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SelectedClassResponse" }
+              }
+            }
+          },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou expiré" },
+          "404": { "description": "Utilisateur introuvable" },
+          "500": { "description": "Erreur interne" }
+        }
+      }
+    },
+    "/classes/select": {
+      "post": {
+        "summary": "Enregistrer le choix de classe d'un joueur pour son prochain match",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SelectClassRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Classe sélectionnée avec succès",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SelectedClassResponse" }
+              }
+            }
+          },
+          "400": { "description": "Identifiant de classe invalide" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou classe verrouillée" },
+          "404": { "description": "Classe ou utilisateur introuvable" },
+          "500": { "description": "Erreur interne" }
+        }
+      },
+      "put": {
+        "summary": "Mettre à jour le choix de classe d'un joueur pour son prochain match",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SelectClassRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Classe sélectionnée avec succès" },
+          "400": { "description": "Identifiant de classe invalide" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou classe verrouillée" },
+          "404": { "description": "Classe ou utilisateur introuvable" },
+          "500": { "description": "Erreur interne" }
+        }
+      }
+    },
     "/classes/{id}": {
       "get": {
         "summary": "Détail d'une classe de bot par identifiant",
@@ -321,6 +405,61 @@
               }
             }
           }
+        }
+      }
+    },
+    "/api/classes/selected": {
+      "get": {
+        "summary": "Consulter la classe sélectionnée par le pilote connecté (alias /classes/selected)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Classe sélectionnée (ou null)" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou expiré" },
+          "404": { "description": "Utilisateur introuvable" },
+          "500": { "description": "Erreur interne" }
+        }
+      }
+    },
+    "/api/classes/select": {
+      "post": {
+        "summary": "Enregistrer le choix de classe d'un joueur (alias /classes/select)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SelectClassRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Classe sélectionnée avec succès" },
+          "400": { "description": "Identifiant de classe invalide" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou classe verrouillée" },
+          "404": { "description": "Classe ou utilisateur introuvable" },
+          "500": { "description": "Erreur interne" }
+        }
+      },
+      "put": {
+        "summary": "Mettre à jour le choix de classe d'un joueur (alias /classes/select)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SelectClassRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Classe sélectionnée avec succès" },
+          "400": { "description": "Identifiant de classe invalide" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou classe verrouillée" },
+          "404": { "description": "Classe ou utilisateur introuvable" },
+          "500": { "description": "Erreur interne" }
         }
       }
     },
