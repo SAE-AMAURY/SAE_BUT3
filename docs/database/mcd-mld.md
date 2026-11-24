@@ -26,9 +26,12 @@ erDiagram
     GAME_CLASS {
         int class_id PK
         string name
+        string description
         int base_health
         int base_range
         int base_damage
+        int base_action_points
+        jsonb available_functions
     }
     MISSION_PROGRESSION {
         int mission_id PK
@@ -68,10 +71,13 @@ Le schéma relationnel traduit les entités et relations ci-dessus dans PostgreS
 
 2. **CLASS** (
    <u>class_id</u> SERIAL,
-   **name** VARCHAR(50) NOT NULL,
-   **base_health** INT NOT NULL,
-   **base_range** INT NOT NULL,
-   **base_damage** INT NOT NULL,
+   **name** VARCHAR(50) NOT NULL UNIQUE,
+   **description** TEXT NOT NULL DEFAULT '',
+   **base_health** INT NOT NULL CHECK (> 0),
+   **base_range** INT NOT NULL CHECK (> 0),
+   **base_damage** INT NOT NULL CHECK (> 0),
+   **base_action_points** INT NOT NULL DEFAULT 3 CHECK (> 0),
+   **available_functions** JSONB NOT NULL DEFAULT '[]'::jsonb,
    #required_mission_id INT NULL REFERENCES MISSION_PROGRESSION(mission_id) ON DELETE SET NULL
 )
 
