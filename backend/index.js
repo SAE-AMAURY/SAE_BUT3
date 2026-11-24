@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { pool } from './db/pool.js';
 import authRouter from './routes/auth.js';
 import arenaRouter, { classesRouter } from './routes/arena.js';
+import scriptsRouter from './routes/scripts.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -74,6 +75,8 @@ app.get('/health', async (req, res) => {
 // Application routes
 app.use('/auth', authRouter);
 app.use('/classes', classesRouter);
+app.use('/scripts', scriptsRouter);
+app.use('/api/scripts', scriptsRouter);
 app.use('/api', arenaRouter);
 
 let server = null;

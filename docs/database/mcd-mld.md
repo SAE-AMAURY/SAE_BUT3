@@ -42,6 +42,7 @@ erDiagram
         int script_id PK
         text code_content
         int round_number
+        timestamp updated_at
     }
 
     %% Relationships
@@ -106,11 +107,12 @@ Le schéma relationnel traduit les entités et relations ci-dessus dans PostgreS
 
 6. **SCRIPT** (
    <u>script_id</u> SERIAL,
-   #match_id INT NOT NULL REFERENCES MATCH(match_id) ON DELETE CASCADE,
+   #match_id INT NULL REFERENCES MATCH(match_id) ON DELETE CASCADE,
    #player_id INT NOT NULL REFERENCES USER(player_id) ON DELETE CASCADE,
-   #class_id INT NOT NULL REFERENCES CLASS(class_id) ON DELETE CASCADE,
+   #class_id INT NULL REFERENCES CLASS(class_id) ON DELETE SET NULL,
    **code_content** TEXT NOT NULL,
-   **round_number** INT NOT NULL CHECK (round_number > 0)
+   **round_number** INT NOT NULL DEFAULT 1 CHECK (round_number > 0),
+   **updated_at** TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 
 ---

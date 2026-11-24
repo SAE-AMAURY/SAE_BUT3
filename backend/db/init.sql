@@ -100,13 +100,23 @@ CREATE TABLE IF NOT EXISTS match (
 -- 7. Table: SCRIPT
 CREATE TABLE IF NOT EXISTS script (
     script_id SERIAL PRIMARY KEY,
-    match_id INT NOT NULL REFERENCES match(match_id) ON DELETE CASCADE,
+    match_id INT REFERENCES match(match_id) ON DELETE CASCADE,
     player_id INT NOT NULL REFERENCES "user"(player_id) ON DELETE CASCADE,
-    class_id INT NOT NULL REFERENCES class(class_id) ON DELETE CASCADE,
+    class_id INT REFERENCES class(class_id) ON DELETE SET NULL,
     code_content TEXT NOT NULL,
-    round_number INT NOT NULL,
+    round_number INT NOT NULL DEFAULT 1,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_round CHECK (round_number > 0)
 );
+
+-- 7b. Évolution idempotente de la table SCRIPT (Issues #22 & #23)
+DO $$
+BEGIN
+    ALTER TABLE script ALTER COLUMN match_id DROP NOT NULL;
+    ALTER TABLE script ALTER COLUMN class_id DROP NOT NULL;
+    ALTER TABLE script ALTER COLUMN round_number SET DEFAULT 1;
+    ALTER TABLE script ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
+END $$;
 
 -- ==============================================================================
 -- Seed Data (Jeu de données de test - Issue #8)

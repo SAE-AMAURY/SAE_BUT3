@@ -117,6 +117,36 @@
         "properties": {
           "class": { "$ref": "#/components/schemas/GameClass" }
         }
+      },
+      "Script": {
+        "type": "object",
+        "properties": {
+          "script_id": { "type": "integer", "example": 1 },
+          "player_id": { "type": "integer", "example": 1 },
+          "match_id": { "type": "integer", "nullable": true, "example": null },
+          "class_id": { "type": "integer", "nullable": true, "example": 1 },
+          "code_content": { "type": "string", "example": "def on_tick(game):\n    game.wait()" },
+          "round_number": { "type": "integer", "example": 1 },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SaveScriptRequest": {
+        "type": "object",
+        "required": ["code_content"],
+        "properties": {
+          "code_content": { "type": "string", "example": "def on_tick(game):\n    game.wait()" },
+          "class_id": { "type": "integer", "nullable": true, "example": 1 },
+          "script_id": { "type": "integer", "nullable": true, "example": 1 },
+          "match_id": { "type": "integer", "nullable": true, "example": null },
+          "round_number": { "type": "integer", "minimum": 1, "example": 1 }
+        }
+      },
+      "ScriptResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "Script sauvegardé avec succès." },
+          "script": { "$ref": "#/components/schemas/Script" }
+        }
       }
     }
   },
@@ -346,6 +376,156 @@
         "summary": "Liste des missions tactiques et conditions de déblocage",
         "responses": {
           "200": { "description": "Liste des missions" }
+        }
+      }
+    },
+    "/scripts": {
+      "post": {
+        "summary": "Enregistrer ou mettre à jour le script du pilote connecté",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SaveScriptRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Script mis à jour",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ScriptResponse" }
+              }
+            }
+          },
+          "201": {
+            "description": "Script sauvegardé",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ScriptResponse" }
+              }
+            }
+          },
+          "400": { "description": "Données de script invalides" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou expiré" },
+          "404": { "description": "Script ciblé introuvable" },
+          "500": { "description": "Erreur interne" }
+        }
+      },
+      "get": {
+        "summary": "Récupérer le dernier script sauvegardé du pilote connecté",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dernier script du pilote",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "script": { "$ref": "#/components/schemas/Script" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou expiré" },
+          "404": { "description": "Aucun script sauvegardé" },
+          "500": { "description": "Erreur interne" }
+        }
+      }
+    },
+    "/scripts/{id}": {
+      "get": {
+        "summary": "Récupérer un script par identifiant (ou alias latest/me)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "example": "latest" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Script trouvé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "script": { "$ref": "#/components/schemas/Script" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Identifiant de script invalide" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou expiré" },
+          "404": { "description": "Script introuvable" },
+          "500": { "description": "Erreur interne" }
+        }
+      }
+    },
+    "/api/scripts": {
+      "post": {
+        "summary": "Enregistrer ou mettre à jour le script du pilote connecté (alias /scripts)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SaveScriptRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Script mis à jour" },
+          "201": { "description": "Script sauvegardé" },
+          "400": { "description": "Données de script invalides" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou expiré" },
+          "404": { "description": "Script ciblé introuvable" },
+          "500": { "description": "Erreur interne" }
+        }
+      },
+      "get": {
+        "summary": "Récupérer le dernier script sauvegardé du pilote connecté (alias /scripts)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Dernier script du pilote" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou expiré" },
+          "404": { "description": "Aucun script sauvegardé" },
+          "500": { "description": "Erreur interne" }
+        }
+      }
+    },
+    "/api/scripts/{id}": {
+      "get": {
+        "summary": "Récupérer un script par identifiant ou alias latest/me (alias /scripts/{id})",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "example": "latest" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Script trouvé" },
+          "400": { "description": "Identifiant de script invalide" },
+          "401": { "description": "Token manquant" },
+          "403": { "description": "Token invalide ou expiré" },
+          "404": { "description": "Script introuvable" },
+          "500": { "description": "Erreur interne" }
         }
       }
     }
