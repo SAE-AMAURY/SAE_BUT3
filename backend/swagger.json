@@ -66,6 +66,57 @@
         "properties": {
           "error": { "type": "string", "example": "Identifiants invalides." }
         }
+      },
+      "ClassFunction": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "charge" },
+          "signature": { "type": "string", "example": "charge(direction)" },
+          "ap_cost": { "type": "integer", "example": 3 },
+          "description": { "type": "string", "example": "Fonce vers un ennemi proche et inflige des dégâts renforcés." }
+        }
+      },
+      "ClassStats": {
+        "type": "object",
+        "properties": {
+          "health": { "type": "integer", "example": 100 },
+          "range": { "type": "integer", "example": 1 },
+          "damage": { "type": "integer", "example": 25 },
+          "action_points": { "type": "integer", "example": 3 }
+        }
+      },
+      "GameClass": {
+        "type": "object",
+        "properties": {
+          "class_id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Guerrier" },
+          "description": { "type": "string", "example": "Combattant polyvalent spécialisé dans le corps à corps et les assauts rapides." },
+          "base_health": { "type": "integer", "example": 100 },
+          "base_range": { "type": "integer", "example": 1 },
+          "base_damage": { "type": "integer", "example": 25 },
+          "base_action_points": { "type": "integer", "example": 3 },
+          "stats": { "$ref": "#/components/schemas/ClassStats" },
+          "available_functions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ClassFunction" }
+          },
+          "required_mission_id": { "type": "integer", "nullable": true, "example": null }
+        }
+      },
+      "ClassesListResponse": {
+        "type": "object",
+        "properties": {
+          "classes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/GameClass" }
+          }
+        }
+      },
+      "ClassDetailResponse": {
+        "type": "object",
+        "properties": {
+          "class": { "$ref": "#/components/schemas/GameClass" }
+        }
       }
     }
   },
@@ -150,11 +201,143 @@
         }
       }
     },
+    "/classes": {
+      "get": {
+        "summary": "Liste des classes de bots avec statistiques et capacités disponibles",
+        "responses": {
+          "200": {
+            "description": "Liste des classes",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ClassesListResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur lors de la récupération des classes",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/classes/{id}": {
+      "get": {
+        "summary": "Détail d'une classe de bot par identifiant",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Détail de la classe",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ClassDetailResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Identifiant de classe invalide",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Classe introuvable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur lors de la récupération de la classe",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/classes": {
       "get": {
-        "summary": "Liste des classes de robots disponibles",
+        "summary": "Liste des classes de robots disponibles (alias /classes)",
         "responses": {
-          "200": { "description": "Liste des classes" }
+          "200": {
+            "description": "Liste des classes",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ClassesListResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur lors de la récupération des classes",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/classes/{id}": {
+      "get": {
+        "summary": "Détail d'une classe de robot par identifiant (alias /classes/{id})",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Détail de la classe",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ClassDetailResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Identifiant de classe invalide",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Classe introuvable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur lors de la récupération de la classe",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
         }
       }
     },
