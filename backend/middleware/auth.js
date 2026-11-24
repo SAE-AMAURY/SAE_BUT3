@@ -11,7 +11,6 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 const JWT_SECRET =
   process.env.JWT_SECRET || 'codearena_dev_secret_key_change_in_production';
 
-
 export function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token =
