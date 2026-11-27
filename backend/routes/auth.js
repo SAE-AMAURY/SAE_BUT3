@@ -16,7 +16,8 @@ router.post('/register', async (req, res) => {
     typeof password !== 'string'
   ) {
     return res.status(400).json({
-      error: 'Nom d’utilisateur, email et mot de passe obligatoires et valides.',
+      error:
+        'Nom d’utilisateur, email et mot de passe obligatoires et valides.',
     });
   }
 
@@ -158,7 +159,6 @@ router.post('/login', async (req, res) => {
       .json({ error: 'Erreur interne lors de la connexion.' });
   }
 });
-
 
 // GET /auth/me (Protected route)
 router.get('/me', authenticateToken, async (req, res) => {
