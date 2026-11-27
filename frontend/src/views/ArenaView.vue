@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { defineAsyncComponent } from 'vue';
 import { useScripts } from '../composables/useScripts.js';
 const CodeEditor = defineAsyncComponent(
@@ -8,10 +8,14 @@ const CodeEditor = defineAsyncComponent(
 
 const { saveScript } = useScripts();
 const canvasRef = ref(null);
+const arenaWidth = 800;
+const arenaHeight = 450;
+const gridCellSize = 50;
 const isRunning = ref(false);
 const tickRate = ref(60);
 const saveState = ref('idle');
 const saveMessage = ref('');
+let canvasResizeObserver;
 const botCode = ref(`# Script du bot Alpha-Guerrier
 def on_tick(game):
     enemy = game.nearest_enemy()
@@ -61,36 +65,67 @@ const logs = ref([
 onMounted(() => {
   const canvas = canvasRef.value;
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
 
-  // Draw grid & initial tactical board
-  drawArena(ctx, canvas.width, canvas.height);
+  drawResponsiveArena();
+  canvasResizeObserver = new ResizeObserver(drawResponsiveArena);
+  canvasResizeObserver.observe(canvas);
 });
 
+onBeforeUnmount(() => canvasResizeObserver?.disconnect());
+
+function drawResponsiveArena() {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const displayWidth = canvas.clientWidth;
+  const displayHeight = canvas.clientHeight;
+  if (!ctx || !displayWidth || !displayHeight) return;
+
+  const pixelRatio = window.devicePixelRatio || 1;
+  canvas.width = Math.round(displayWidth * pixelRatio);
+  canvas.height = Math.round(displayHeight * pixelRatio);
+  ctx.setTransform(
+    (displayWidth / arenaWidth) * pixelRatio,
+    0,
+    0,
+    (displayHeight / arenaHeight) * pixelRatio,
+    0,
+    0
+  );
+
+  drawArena(ctx, arenaWidth, arenaHeight);
+}
+
 function drawArena(ctx, width, height) {
-  // Clear
   ctx.fillStyle = '#2C363F';
   ctx.fillRect(0, 0, width, height);
 
-  // Tactical Grid
+  ctx.beginPath();
   ctx.strokeStyle = '#3D4B54';
   ctx.lineWidth = 1;
-  const gridSize = 40;
-
-  for (let x = 0; x < width; x += gridSize) {
-    ctx.beginPath();
+  for (let x = 0; x <= width; x += gridCellSize) {
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
-    ctx.stroke();
   }
-
-  for (let y = 0; y < height; y += gridSize) {
-    ctx.beginPath();
+  for (let y = 0; y <= height; y += gridCellSize) {
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
-    ctx.stroke();
   }
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.strokeStyle = '#53636C';
+  ctx.lineWidth = 1.5;
+  for (let x = gridCellSize * 5; x < width; x += gridCellSize * 5) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+  }
+  for (let y = gridCellSize * 5; y < height; y += gridCellSize * 5) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+  }
+  ctx.stroke();
 
   // Draw demo bot A
   ctx.save();
@@ -216,16 +251,19 @@ async function handleSaveCode() {
       >
         <canvas
           ref="canvasRef"
-          width="800"
-          height="450"
+          :width="arenaWidth"
+          :height="arenaHeight"
           id="arena-canvas"
+          aria-label="Plateau tactique de 16 colonnes et 9 lignes"
           class="w-full max-w-full h-auto rounded-lg border border-arena-soft/20 shadow-inner bg-arena-bg"
-        ></canvas>
+        >
+          Votre navigateur ne prend pas en charge l’élément Canvas.
+        </canvas>
 
         <div
           class="w-full flex items-center justify-between text-xs text-arena-soft/80 mt-3 px-1"
         >
-          <span>Dimensions: 800 x 450 px</span>
+          <span>Plateau : 800 × 450 px · 16 × 9 cases de 50 px</span>
           <span class="flex items-center gap-1.5">
             <span
               class="w-2 h-2 rounded-full"
